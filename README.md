@@ -13,7 +13,7 @@ In order to keep it simple, this program does not follow the official spec in RF
 
 ## Instructions
 
-To run ping.py: `sudo python3 ping.py [option] host`'
+To run ping.py: `sudo python3 ping.py [option] host`
 
 ### Options
 

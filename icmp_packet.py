@@ -36,7 +36,7 @@ class IcmpPacket:
         self.__ipTimeout: int = TIMEOUT            # Timeout for receiving packets
         self.__ttl: int = TTL                      # Time to live
         self.__statistics: Statistics = statistics # Statistics object
-        self.__DEBUG_IcmpPacket: bool = debug      # Debug flag
+        self.__debug: bool = debug                 # Debug flag
 
     # ############################################################
     # Setter                                                     #
@@ -89,7 +89,7 @@ class IcmpPacket:
                 icmp_code = recv_packet[IP_HEADER_SIZE + 1]
 
                 if icmp_type == ICMPType.ECHO_REPLY:
-                    echo_reply = EchoReply(recv_packet, self.__statistics, self.__DEBUG_IcmpPacket)
+                    echo_reply = EchoReply(recv_packet, self.__statistics, self.__debug)
                     self.__validate_reply(echo_reply)
                     echo_reply.print_result_to_console(self.__ttl, time_received, addr, self)
                 elif icmp_type in [ICMPType.DESTINATION_UNREACHABLE, ICMPType.TIME_EXCEEDED]:
@@ -139,7 +139,7 @@ class IcmpPacket:
     # Private Functions                                          #
     # ############################################################
     def __recalculate_checksum(self):
-        if self.__DEBUG_IcmpPacket:
+        if self.__debug:
             print("Calculating Checksum...")
         packet_as_bytes = self.__header + self.__data
         checksum = 0
@@ -164,7 +164,7 @@ class IcmpPacket:
         answer = ~checksum & 0xFFFF
         # Swap bytes for little endian systems
         answer = (answer >> 8) | (answer << 8 & 0xFF00)
-        if self.__DEBUG_IcmpPacket:
+        if self.__debug:
             print("Checksum: ", hex(answer))
 
         self.__packetChecksum = answer
@@ -179,7 +179,7 @@ class IcmpPacket:
             self.__packetIdentifier,      # ex: 12345
             self.__packetSequenceNumber   # ex: 1
         )
-        if self.__DEBUG_IcmpPacket:
+        if self.__debug:
             # b'\x08\x00\x1c-\x30\x39\x00\x01'
             print(f"Packed Header:  {self.__header}")
 
@@ -203,7 +203,7 @@ class IcmpPacket:
         # Check sequence number
         if self.__packetSequenceNumber != echo_reply_packet.get_icmp_sequence_number():
             checkFlag = False
-            if self.__DEBUG_IcmpPacket:
+            if self.__debug:
                 print(
                     f"Packet Sequence number expected: {self.__packetSequenceNumber}, "
                     f"received: {echo_reply_packet.get_icmp_sequence_number()}"
@@ -215,7 +215,7 @@ class IcmpPacket:
         # Check identifier
         if self.__packetIdentifier != echo_reply_packet.get_icmp_identifier():
             checkFlag = False
-            if self.__DEBUG_IcmpPacket:
+            if self.__debug:
                 print(
                     f"Packet Identifier expected: {self.__packetIdentifier}, "
                     f"received: {echo_reply_packet.get_icmp_identifier()}"
@@ -227,7 +227,7 @@ class IcmpPacket:
         # Check raw data
         if self.__dataRaw != echo_reply_packet.get_icmp_data():
             checkFlag = False
-            if self.__DEBUG_IcmpPacket:
+            if self.__debug:
                 print(
                     f"Raw Data expected: {self.__dataRaw}, "
                     f"received: {echo_reply_packet.get_icmp_data()}"
@@ -243,7 +243,7 @@ class IcmpPacket:
         key = (ICMPType(icmp_type), icmp_code) if icmp_code is not None else (ICMPType(icmp_type), None)
         message = ICMP_MESSAGES.get(key, "Unknown ICMP Type or Code")
         
-        if self.__DEBUG_IcmpPacket:
+        if self.__debug:
             print(f"ICMP Type: {icmp_type}, Code: {icmp_code}, Message: {message}")
         
         return message
